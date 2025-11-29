@@ -88,10 +88,10 @@ int main() {
     // Nível 3 (Filhos do Quarto Principal) - Nó folha esperado
     raiz->esquerda->esquerda->esquerda = criarSala("Closet"); 
     
-    // 2. Iniciar a navegação
+    // Iniciar a navegação
     explorarSalas(raiz);
 
-    // 3. Limpeza de memória
+    // Limpeza de memória
     liberarMemoria(raiz);
 
     return 0;
