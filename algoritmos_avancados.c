@@ -1,47 +1,98 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-// Desafio Detective Quest
-// Tema 4 - Árvores e Tabela Hash
-// Este código inicial serve como base para o desenvolvimento das estruturas de navegação, pistas e suspeitos.
-// Use as instruções de cada região para desenvolver o sistema completo com árvore binária, árvore de busca e tabela hash.
+//estrutura para um cômodo (nó da árvore)
+typedef struct Comodo {
+    char nome[50];
+    struct Comodo *esquerda; 
+    struct Comodo *direita;  
+} Comodo;
 
+//Cria dinamicamente um novo cômodo (sala) com o nome especificado.
+Comodo* criarSala(const char* nome) {
+    Comodo* novoComodo = (Comodo*)malloc(sizeof(Comodo));
+    if (novoComodo == NULL) {
+        printf("Erro na alocacao de memoria!\n");
+        exit(1);
+    }
+    strncpy(novoComodo->nome, nome, sizeof(novoComodo->nome) - 1);
+    novoComodo->nome[sizeof(novoComodo->nome) - 1] = '\0';
+    novoComodo->esquerda = NULL;
+    novoComodo->direita = NULL;
+    return novoComodo;
+}
+
+//Função para Explorar os comodos da mansão
+void explorarSalas(Comodo* comodoInicial) {
+    Comodo* atual = comodoInicial;
+    char escolha;
+
+    printf("Iniciando exploracao da mansao. Bem-vindo!\n");
+    printf("Voce pode escolher 'e' (esquerda), 'd' (direita) ou 's' (sair).\n\n");
+
+    while (atual != NULL) {
+        printf("Voce esta em: %s\n", atual->nome);
+
+        if (atual->esquerda == NULL && atual->direita == NULL) {
+            printf("Voce alcancou um comodo sem saidas adicionais (um no-folha). Fim da exploracao.\n");
+            break; 
+        }
+        // Menu de opções
+        printf("Opcoes de caminho: ");
+        if (atual->esquerda != NULL) printf("e (esquerda) ");
+        if (atual->direita != NULL) printf("d (direita) ");
+        printf("ou s (sair): ");
+    
+        while ((getchar()) != '\n'); 
+        scanf(" %c", &escolha);
+
+        if (escolha == 's' || escolha == 'S') {
+            printf("Saindo da exploracao.\n");
+            break;
+        } else if ((escolha == 'e' || escolha == 'E') && atual->esquerda != NULL) {
+            atual = atual->esquerda;
+        } else if ((escolha == 'd' || escolha == 'D') && atual->direita != NULL) {
+            atual = atual->direita;
+        } else {
+            printf("Escolha invalida ou caminho inexistente. Tente novamente.\n");
+        }
+        printf("\n");
+    }
+}
+
+//Libera a memória alocada para a árvore
+void liberarMemoria(Comodo* comodo) {
+    if (comodo == NULL) return;
+    liberarMemoria(comodo->esquerda);
+    liberarMemoria(comodo->direita);
+    free(comodo);
+}
+
+//Funcao principal que monta o mapa inicial da mansao e inicia a exploracao.
 int main() {
+    //raíz da mansão (entrada)
+    Comodo* raiz = criarSala("Entrada Principal");
+    
+    // Nível 1
+    raiz->esquerda = criarSala("Sala de Estar");
+    raiz->direita = criarSala("Cozinha");
+    
+    // Nível 2 (Filhos da Sala de Estar)
+    raiz->esquerda->esquerda = criarSala("Quarto Principal");
+    raiz->esquerda->direita = criarSala("Banheiro Social");
+    
+    // Nível 2 (Filhos da Cozinha)
+    raiz->direita->direita = criarSala("Jardim de Inverno");
+    
+    // Nível 3 (Filhos do Quarto Principal) - Nó folha esperado
+    raiz->esquerda->esquerda->esquerda = criarSala("Closet"); 
+    
+    // 2. Iniciar a navegação
+    explorarSalas(raiz);
 
-    // 🌱 Nível Novato: Mapa da Mansão com Árvore Binária
-    //
-    // - Crie uma struct Sala com nome, e dois ponteiros: esquerda e direita.
-    // - Use funções como criarSala(), conectarSalas() e explorarSalas().
-    // - A árvore pode ser fixa: Hall de Entrada, Biblioteca, Cozinha, Sótão etc.
-    // - O jogador deve poder explorar indo à esquerda (e) ou à direita (d).
-    // - Finalize a exploração com uma opção de saída (s).
-    // - Exiba o nome da sala a cada movimento.
-    // - Use recursão ou laços para caminhar pela árvore.
-    // - Nenhuma inserção dinâmica é necessária neste nível.
-
-    // 🔍 Nível Aventureiro: Armazenamento de Pistas com Árvore de Busca
-    //
-    // - Crie uma struct Pista com campo texto (string).
-    // - Crie uma árvore binária de busca (BST) para inserir as pistas coletadas.
-    // - Ao visitar salas específicas, adicione pistas automaticamente com inserirBST().
-    // - Implemente uma função para exibir as pistas em ordem alfabética (emOrdem()).
-    // - Utilize alocação dinâmica e comparação de strings (strcmp) para organizar.
-    // - Não precisa remover ou balancear a árvore.
-    // - Use funções para modularizar: inserirPista(), listarPistas().
-    // - A árvore de pistas deve ser exibida quando o jogador quiser revisar evidências.
-
-    // 🧠 Nível Mestre: Relacionamento de Pistas com Suspeitos via Hash
-    //
-    // - Crie uma struct Suspeito contendo nome e lista de pistas associadas.
-    // - Crie uma tabela hash (ex: array de ponteiros para listas encadeadas).
-    // - A chave pode ser o nome do suspeito ou derivada das pistas.
-    // - Implemente uma função inserirHash(pista, suspeito) para registrar relações.
-    // - Crie uma função para mostrar todos os suspeitos e suas respectivas pistas.
-    // - Adicione um contador para saber qual suspeito foi mais citado.
-    // - Exiba ao final o “suspeito mais provável” baseado nas pistas coletadas.
-    // - Para hashing simples, pode usar soma dos valores ASCII do nome ou primeira letra.
-    // - Em caso de colisão, use lista encadeada para tratar.
-    // - Modularize com funções como inicializarHash(), buscarSuspeito(), listarAssociacoes().
+    // 3. Limpeza de memória
+    liberarMemoria(raiz);
 
     return 0;
 }
-
